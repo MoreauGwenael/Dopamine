@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+  dopamine:
+    build:
+      context: .
+      target: base
+    restart: always
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - YOUTUBE_TOKEN=${YOUTUBE_TOKEN}
+      - PLAYLIST_ID=${PLAYLIST_ID}
