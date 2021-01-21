@@ -2,8 +2,6 @@
 
 ## Requirements
 
-Python 3 w/ theses modules :
-```bash
-pip install -U discord.py
-pip install -U python-dotenv
-```
+- Fill in secrets in .env
+- Install docker and docker-compose
+- Use docker-compose up -d

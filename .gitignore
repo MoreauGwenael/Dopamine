@@ -1,0 +1,8 @@
+
+venv/
+
+\.idea/
+
+dopamine/__pycache__/
+
+\.env
