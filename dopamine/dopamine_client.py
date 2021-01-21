@@ -26,5 +26,11 @@ class DopamineClient(discord.Client):
 
                 # Send the randomized URL from videos list
                 await message.channel.send('https://www.youtube.com/watch?v=' + video_id)
+
+            if message.content == '!pinned':
+                channels = message.guild.text_channels
+                await self.discord_helper.update_pinned_messages(channels)
+                await message.channel.send(self.discord_helper.get_random_pinned_message())
+
         except Exception as e:
             raise e
