@@ -21,7 +21,7 @@ class DiscordHelper:
             logging.info(f'{len(self.videos_ids) - self.video_number} added since last refresh.')
         self.video_number = len(self.videos_ids)
         logging.info(f'{self.video_number} dopamine videos available !')
-        threading.Timer(1800, self.update_videos()).start()
+        threading.Timer(1800, self.update_videos).start()
 
     def get_all_videos(self):
         videos = []
