@@ -22,7 +22,6 @@ class DiscordHelper:
 
     async def update_pinned_messages(self, channels):
         if not self.pinned_messages_updated:
-            all_pinned_messages = []
             # go through each channel
             for chan in channels:
                 # get pins present in this channel
