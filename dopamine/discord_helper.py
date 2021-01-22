@@ -10,7 +10,7 @@ class DiscordHelper:
     def __init__(self):
         self.youtube_token = os.getenv('YOUTUBE_TOKEN')
         self.playlists_id = eval(os.getenv('PLAYLIST_ID'))
-        self.videos_ids = None
+        self.video_ids = None
         self.video_number = None
         self.update_videos()
 
@@ -41,10 +41,10 @@ class DiscordHelper:
 
     def update_videos(self):
         logging.info('Updating video list !')
-        self.videos_ids = self.get_all_videos()
-        if self.video_number is not None and self.video_number < len(self.videos_ids):
-            logging.info(f'{len(self.videos_ids) - self.video_number} added since last refresh.')
-        self.video_number = len(self.videos_ids)
+        self.video_ids = self.get_all_videos()
+        if self.video_number is not None and self.video_number < len(self.video_ids):
+            logging.info(f'{len(self.video_ids) - self.video_number} added since last refresh.')
+        self.video_number = len(self.video_ids)
         logging.info(f'{self.video_number} dopamine videos available !')
         threading.Timer(1800, self.update_videos).start()
 
