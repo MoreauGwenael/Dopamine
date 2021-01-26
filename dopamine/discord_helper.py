@@ -45,7 +45,8 @@ class DiscordHelper:
             logging.info(f'{len(self.video_ids) - self.video_number} added since last refresh.')
         self.video_number = len(self.video_ids)
         logging.info(f'{self.video_number} dopamine videos available !')
-        threading.Timer(1800, self.update_videos).start()
+        # Update every two weeks
+        threading.Timer(50400, self.update_videos).start()
 
     def get_all_videos(self):
         videos = []
@@ -82,4 +83,12 @@ class DiscordHelper:
         return videos
 
     def get_random_vid(self):
-        return self.video_ids[randint(0, len(self.video_ids) - 1)]
+        # Refresh the list only if we reach 1/3 of videos in the list
+        if len(self.video_ids) < self.video_number/3:
+            self.update_videos()
+
+        random_index = randint(0, len(self.video_ids) - 1)
+        random_id = self.video_ids[random_index]
+        # Removing the id from the list so it can't be picked again
+        self.video_ids.remove(random_index)
+        return random_id
