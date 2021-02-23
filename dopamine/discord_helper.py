@@ -90,5 +90,7 @@ class DiscordHelper:
         random_index = randint(0, len(self.video_ids) - 1)
         random_id = self.video_ids[random_index]
         # Removing the id from the list so it can't be picked again
-        self.video_ids.remove(random_index)
+        logging.info(f'{random_id} removed from the list. It won\'t be picked again')
+        self.video_ids.remove(random_id)
+        logging.info(f'{len(self.video_ids)} videos remaining !')
         return random_id
