@@ -12,7 +12,7 @@ class DopamineClient(discord.Client):
         logging.info('Init discord client')
         self.discord_helper = DiscordHelper()
         self.available_commands_basic = ['!dopamine', '!pinned']
-        self.available_commands_admin = ['!reset Pseudo#0000', '!tg Pseudo#0000', '!debaillonay Pseudo#0000', '!maintenance', '!op Pseudo#0000', '!deop Pseudo#0000']
+        self.available_commands_admin = ['!reset', '!tg', '!debaillonay', '!maintenance', '!op', '!deop']
         self.admins = ['Shloumpf#6792', 'mesh33#2225']
         self.muted = []
         self.mean = [
@@ -106,7 +106,7 @@ class DopamineClient(discord.Client):
                 else:
                     await message.channel.send(self.mean[randint(0, len(self.mean) - 1)])
 
-            if message.author not in self.muted:
+            elif message.author not in self.muted:
                 if self.user_quotas[message.author].use_quota():
                     # Print random youtube video
                     if message.content == '!dopamine':
