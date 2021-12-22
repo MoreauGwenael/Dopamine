@@ -34,7 +34,7 @@ class DopamineClient(discord.Client):
                 return
 
             if message.content == '!commands':
-                if message.author in self.admins:
+                if str(message.author) in self.admins:
                     commands_message = 'Bien sûr maître, les commandes sont ci-dessous, disposez-en à votre guise :'
                     for command in self.available_commands_basic:
                         commands_message += f'\t{command}\n'
@@ -52,7 +52,7 @@ class DopamineClient(discord.Client):
                 self.user_quotas[message.author] = Quota(message.author)
 
             if message.content.split()[0] in self.available_commands_admin:
-                if message.author in self.admins:
+                if str(message.author) in self.admins:
                     if message.content() == '!maintenance':
                         await message.channel.send('Le serveur va partir en maintenance, préparez-vous au RIGGED')
 
@@ -61,7 +61,9 @@ class DopamineClient(discord.Client):
                             target = message.content.split()[1]
                             if target in self.user_quotas:
                                 logging.info('Resetting quota for ' + target)
-                                self.user_quotas[target].reset_quota()
+                                users = list(map(str, self.user_quotas.keys()))
+                                real_target = self.user_quotas.keys()[users.index(target)]
+                                self.user_quotas[real_target].reset_quota()
                             await message.channel.send('Les quotas de ' + target + ' ont été réinitialisés, deboulonnay now')
                         else:
                             await message.channel.send('T\'as pas oublié quelqu\'un toi ?')
@@ -106,7 +108,7 @@ class DopamineClient(discord.Client):
                 else:
                     await message.channel.send(self.mean[randint(0, len(self.mean) - 1)])
 
-            elif message.author not in self.muted:
+            elif str(message.author) not in self.muted and message.content in self.available_commands_basic:
                 if self.user_quotas[message.author].use_quota():
                     # Print random youtube video
                     if message.content == '!dopamine':
