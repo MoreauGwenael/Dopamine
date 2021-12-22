@@ -1,4 +1,5 @@
 import logging
+from random import randint
 
 import discord
 
@@ -10,7 +11,16 @@ class DopamineClient(discord.Client):
     def __init__(self):
         logging.info('Init discord client')
         self.discord_helper = DiscordHelper()
-        self.available_commands = ['!dopamine', '!pinned']
+        self.available_commands_basic = ['!dopamine', '!pinned']
+        self.available_commands_admin = ['!reset Pseudo#0000', '!tg Pseudo#0000', '!debaillonay Pseudo#0000', '!maintenance', '!op Pseudo#0000', '!deop Pseudo#0000']
+        self.admins = ['Shloumpf#6792', 'mesh33#2225']
+        self.muted = []
+        self.mean = [
+            'Culé de villageois, tu te crois tout permis ?',
+            'Commence par la fermer toi, \'spèce de gueux',
+            'C\'est non',
+            'Tu te prends pour qui ? Retourne dans la plèbe',
+        ]
         self.user_quotas = {}
         super().__init__()
 
@@ -22,17 +32,81 @@ class DopamineClient(discord.Client):
             # Exit if bot is calling himself
             if message.author == self.user:
                 return
+
             if message.content == '!commands':
-                commands_message = 'Enculé de Luigi, les commandes à ta disposition sont les suivantes:\n'
-                for command in self.available_commands:
-                    commands_message += f'\t{command}\n'
-                commands_message += 'Allez, suce toi.'
-                await message.channel.send(commands_message)
+                if message.author in self.admins:
+                    commands_message = 'Bien sûr maître, les commandes sont ci-dessous, disposez-en à votre guise :'
+                    for command in self.available_commands_basic:
+                        commands_message += f'\t{command}\n'
+                    for command in self.available_commands_admin:
+                        commands_message += f'\t{command}\n'
+                    commands_message += 'Allez, suces-toi quand même'
+                else:
+                    commands_message = 'Enculé de Luigi, les commandes à ta disposition sont les suivantes :\n'
+                    for command in self.available_commands_basic:
+                        commands_message += f'\t{command}\n'
+                    commands_message += 'Allez, suces-toi.'
+                    await message.channel.send(commands_message)
 
-            if message.content in self.available_commands:
-                if message.author not in self.user_quotas:
-                    self.user_quotas[message.author] = Quota(message.author)
+            if message.author not in self.user_quotas:
+                self.user_quotas[message.author] = Quota(message.author)
 
+            if message.content.split()[0] in self.available_commands_admin:
+                if message.author in self.admins:
+                    if message.content() == '!maintenance':
+                        await message.channel.send('Le serveur va partir en maintenance, préparez-vous au RIGGED')
+
+                    if message.content.split()[0] == '!reset':
+                        if len(message.content) >= 2:
+                            target = message.content.split()[1]
+                            if target in self.user_quotas:
+                                logging.info('Resetting quota for ' + target)
+                                self.user_quotas[target].reset_quota()
+                            await message.channel.send('Les quotas de ' + target + ' ont été réinitialisés, deboulonnay now')
+                        else:
+                            await message.channel.send('T\'as pas oublié quelqu\'un toi ?')
+                    
+                    if message.content.split()[0] == '!tg':
+                        if len(message.content) >= 2:
+                            target = message.content.split()[1]
+                            if target not in self.muted:
+                                logging.info('`voice_enable 0` for ' + target)
+                                self.muted.append(target)
+                            await message.channel.send('TG ' + target)
+                        else:
+                            await message.channel.send('Avant de vouloir faire taire quelqu\'un, commence par écrire correctement')
+
+                    if message.content.split()[0] == '!debaillonay':
+                        if len(message.content) >= 2:
+                            target = message.content.split()[1]
+                            if target not in self.muted:
+                                logging.info('`voice_enable 1` for ' + target)
+                                self.muted.remove(target)
+                            await message.channel.send('Aller vas-y tu peux parler ' + target)
+                        else:
+                            await message.channel.send('Désolé y\a pas de /deban all, précise un peu ou j\'te mute')
+                    
+                    if message.content.split()[0] == '!op':
+                        if len(message.content) >= 2:
+                            target = message.contnet.split()[1]
+                            logging.info('Opped' + target)
+                            self.admins.append(target)
+                            await message.channel.send(target + ' : --Développement de Âge des châteaux effectué(e)--')
+                        else:
+                            await message.channel.send('En fait tu sais pas lire les commandes c\'est ça ?')
+                    
+                    if message.content.split()[0] == '!deop':
+                        if len(message.content) >= 2:
+                            target = message.contnet.split()[1]
+                            logging.info('Deopped' + target)
+                            self.admins.remove(target)
+                            await message.channel.send(target + ' : Fin des données de la partie')
+                        else:
+                            await message.channel.send('En fait tu sais pas lire les commandes c\'est ça ?')
+                else:
+                    await message.channel.send(self.mean[randint(0, len(self.mean) - 1)])
+
+            if message.author not in self.muted:
                 if self.user_quotas[message.author].use_quota():
                     # Print random youtube video
                     if message.content == '!dopamine':
@@ -49,5 +123,7 @@ class DopamineClient(discord.Client):
                         await message.channel.send(self.discord_helper.get_random_pinned_message())
                 else:
                     await message.channel.send('T\'as plus aucun crédit enculé. T\'aurais pas abusé de la dopamine un peu ? Va falloir attendre, enculé de Luigi.')
+            else:
+                await message.channel.send('Les noobs ont pas le droit de parler')
         except Exception as e:
             raise e

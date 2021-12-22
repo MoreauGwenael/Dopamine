@@ -8,11 +8,12 @@ class Quota:
         self.discord_user = discord_user
         self.start_quota = int(os.getenv('START_USER_QUOTA', 3))
         self.quota_remaining = self.start_quota
+        self.muted = False
         self.refresh_quota()
 
     def refresh_quota(self):
         logging.info(f'[Quota] Refreshing quota for {self.discord_user}')
-        if self.quota_remaining < self.start_quota:
+        if self.quota_remaining < self.start_quota and not self.muted:
             self.quota_remaining += 1
 
         # Add one credit every 1800s == 30min
@@ -26,3 +27,6 @@ class Quota:
         else:
             # No quota ...
             return False
+
+    def reset_quota(self):
+        self.quota_remaining = self.start_quota
