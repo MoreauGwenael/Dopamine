@@ -30,7 +30,7 @@ class DopamineClient(discord.Client):
     async def on_message(self, message):
         try:
             # Exit if bot is calling himself
-            if message.author == self.user:
+            if message.author == self.user or message.content[0] != '!':
                 return
 
             if message.content == '!commands':
@@ -108,23 +108,24 @@ class DopamineClient(discord.Client):
                 else:
                     await message.channel.send(self.mean[randint(0, len(self.mean) - 1)])
 
-            elif str(message.author) not in self.muted and message.content in self.available_commands_basic:
-                if self.user_quotas[message.author].use_quota():
-                    # Print random youtube video
-                    if message.content == '!dopamine':
-                        logging.info('Dopamine request <3')
-                        video_id = self.discord_helper.get_random_vid()
+            elif str(message.author) not in self.muted:
+                if message.content in self.available_commands_basic:
+                    if self.user_quotas[message.author].use_quota():
+                        # Print random youtube video
+                        if message.content == '!dopamine':
+                            logging.info('Dopamine request <3')
+                            video_id = self.discord_helper.get_random_vid()
 
-                        # Send the randomized URL from videos list
-                        await message.channel.send('https://www.youtube.com/watch?v=' + video_id)
+                            # Send the randomized URL from videos list
+                            await message.channel.send('https://www.youtube.com/watch?v=' + video_id)
 
-                    if message.content == '!pinned':
-                        logging.info('PINNED message requested')
-                        channels = message.guild.text_channels
-                        await self.discord_helper.update_pinned_messages(channels)
-                        await message.channel.send(self.discord_helper.get_random_pinned_message())
-                else:
-                    await message.channel.send('T\'as plus aucun crédit enculé. T\'aurais pas abusé de la dopamine un peu ? Va falloir attendre, enculé de Luigi.')
+                        if message.content == '!pinned':
+                            logging.info('PINNED message requested')
+                            channels = message.guild.text_channels
+                            await self.discord_helper.update_pinned_messages(channels)
+                            await message.channel.send(self.discord_helper.get_random_pinned_message())
+                    else:
+                        await message.channel.send('T\'as plus aucun crédit enculé. T\'aurais pas abusé de la dopamine un peu ? Va falloir attendre, enculé de Luigi.')
             else:
                 await message.channel.send('Les noobs ont pas le droit de parler')
         except Exception as e:
