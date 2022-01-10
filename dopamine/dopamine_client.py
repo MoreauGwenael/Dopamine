@@ -36,7 +36,7 @@ class DopamineClient(discord.Client):
                 return
 
             if message.content == '!commands':
-                if str(message.author) in self.admins:
+                if message.author.name in self.admins:
                     commands_message = 'Bien sûr maître, les commandes sont ci-dessous, disposez-en à votre guise :\n'
                     for command in self.available_commands_basic:
                         commands_message += f'\t{command}\n'
@@ -92,7 +92,7 @@ class DopamineClient(discord.Client):
                     
                     if message.content.split()[0] == '!op':
                         if len(message.content.split()) >= 2:
-                            target = message.contnet.split()[1]
+                            target = message.content.split()[1]
                             logging.info('Opped' + target)
                             self.admins.append(target)
                             await message.channel.send(target + ' : --Développement de Âge des châteaux effectué(e)--')
@@ -101,7 +101,7 @@ class DopamineClient(discord.Client):
                     
                     if message.content.split()[0] == '!deop':
                         if len(message.content.split()) >= 2:
-                            target = message.contnet.split()[1]
+                            target = message.content.split()[1]
                             if target in self.admins:
                                 logging.info('Deopped' + target)
                                 self.admins.remove(target)
