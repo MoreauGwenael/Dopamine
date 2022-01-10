@@ -29,8 +29,10 @@ class DopamineClient(discord.Client):
 
     async def on_message(self, message):
         try:
-            # Exit if bot is calling himself
             if message.author == self.user:
+                return
+            
+            if message.content[0] != '!':
                 return
 
             if message.content == '!commands':
@@ -81,7 +83,7 @@ class DopamineClient(discord.Client):
                     if message.content.split()[0] == '!debaillonay':
                         if len(message.content.split()) >= 2:
                             target = message.content.split()[1]
-                            if target not in self.muted:
+                            if target in self.muted:
                                 logging.info('`voice_enable 1` for ' + target)
                                 self.muted.remove(target)
                             await message.channel.send('Aller vas-y tu peux parler ' + target)
@@ -100,8 +102,9 @@ class DopamineClient(discord.Client):
                     if message.content.split()[0] == '!deop':
                         if len(message.content.split()) >= 2:
                             target = message.contnet.split()[1]
-                            logging.info('Deopped' + target)
-                            self.admins.remove(target)
+                            if target in self.admins:
+                                logging.info('Deopped' + target)
+                                self.admins.remove(target)
                             await message.channel.send(target + ' : Fin des données de la partie')
                         else:
                             await message.channel.send('En fait tu sais pas lire les commandes c\'est ça ?')
