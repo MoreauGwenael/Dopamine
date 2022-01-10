@@ -13,7 +13,7 @@ class DopamineClient(discord.Client):
         self.discord_helper = DiscordHelper()
         self.available_commands_basic = ['!dopamine', '!pinned']
         self.available_commands_admin = ['!reset', '!tg', '!debaillonay', '!maintenance', '!op', '!deop']
-        self.admins = ['Shloumpf#6792', 'mesh33#2225']
+        self.admins = ['Shloumpf', 'mesh33']
         self.muted = []
         self.mean = [
             'Culé de villageois, tu te crois tout permis ?',
@@ -35,7 +35,7 @@ class DopamineClient(discord.Client):
 
             if message.content == '!commands':
                 if str(message.author) in self.admins:
-                    commands_message = 'Bien sûr maître, les commandes sont ci-dessous, disposez-en à votre guise :'
+                    commands_message = 'Bien sûr maître, les commandes sont ci-dessous, disposez-en à votre guise :\n'
                     for command in self.available_commands_basic:
                         commands_message += f'\t{command}\n'
                     for command in self.available_commands_admin:
@@ -52,12 +52,12 @@ class DopamineClient(discord.Client):
                 self.user_quotas[message.author] = Quota(message.author)
 
             if message.content.split()[0] in self.available_commands_admin:
-                if str(message.author) in self.admins:
+                if message.author.name in self.admins:
                     if message.content() == '!maintenance':
                         await message.channel.send('Le serveur va partir en maintenance, préparez-vous au RIGGED')
 
                     if message.content.split()[0] == '!reset':
-                        if len(message.content) >= 2:
+                        if len(message.content.split()) >= 2:
                             target = message.content.split()[1]
                             if target in self.user_quotas:
                                 logging.info('Resetting quota for ' + target)
@@ -69,7 +69,7 @@ class DopamineClient(discord.Client):
                             await message.channel.send('T\'as pas oublié quelqu\'un toi ?')
                     
                     if message.content.split()[0] == '!tg':
-                        if len(message.content) >= 2:
+                        if len(message.content.split()) >= 2:
                             target = message.content.split()[1]
                             if target not in self.muted:
                                 logging.info('`voice_enable 0` for ' + target)
@@ -79,7 +79,7 @@ class DopamineClient(discord.Client):
                             await message.channel.send('Avant de vouloir faire taire quelqu\'un, commence par écrire correctement')
 
                     if message.content.split()[0] == '!debaillonay':
-                        if len(message.content) >= 2:
+                        if len(message.content.split()) >= 2:
                             target = message.content.split()[1]
                             if target not in self.muted:
                                 logging.info('`voice_enable 1` for ' + target)
@@ -89,7 +89,7 @@ class DopamineClient(discord.Client):
                             await message.channel.send('Désolé y\a pas de /deban all, précise un peu ou j\'te mute')
                     
                     if message.content.split()[0] == '!op':
-                        if len(message.content) >= 2:
+                        if len(message.content.split()) >= 2:
                             target = message.contnet.split()[1]
                             logging.info('Opped' + target)
                             self.admins.append(target)
@@ -98,7 +98,7 @@ class DopamineClient(discord.Client):
                             await message.channel.send('En fait tu sais pas lire les commandes c\'est ça ?')
                     
                     if message.content.split()[0] == '!deop':
-                        if len(message.content) >= 2:
+                        if len(message.content.split()) >= 2:
                             target = message.contnet.split()[1]
                             logging.info('Deopped' + target)
                             self.admins.remove(target)
@@ -108,7 +108,7 @@ class DopamineClient(discord.Client):
                 else:
                     await message.channel.send(self.mean[randint(0, len(self.mean) - 1)])
 
-            elif str(message.author) not in self.muted:
+            elif message.author.name not in self.muted:
                 if message.content in self.available_commands_basic:
                     if self.user_quotas[message.author].use_quota():
                         # Print random youtube video
