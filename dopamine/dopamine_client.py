@@ -53,7 +53,7 @@ class DopamineClient(discord.Client):
 
             if message.content.split()[0] in self.available_commands_admin:
                 if message.author.name in self.admins:
-                    if message.content() == '!maintenance':
+                    if message.content == '!maintenance':
                         await message.channel.send('Le serveur va partir en maintenance, préparez-vous au RIGGED')
 
                     if message.content.split()[0] == '!reset':
