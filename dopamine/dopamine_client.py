@@ -35,6 +35,9 @@ class DopamineClient(discord.Client):
             if message.content[0] != '!':
                 return
 
+            if message.author not in self.user_quotas:
+                self.user_quotas[message.author] = Quota(message.author)
+
             if message.content == '!commands':
                 if message.author.name in self.admins:
                     commands_message = 'Bien sûr maître, les commandes sont ci-dessous, disposez-en à votre guise :\n'
@@ -50,9 +53,6 @@ class DopamineClient(discord.Client):
                     commands_message += 'Allez, suces-toi.'
                 await message.channel.send(commands_message)
 
-            if message.author not in self.user_quotas:
-                self.user_quotas[message.author] = Quota(message.author)
-
             if message.content.split()[0] in self.available_commands_admin:
                 if message.author.name in self.admins:
                     if message.content == '!maintenance':
@@ -61,11 +61,11 @@ class DopamineClient(discord.Client):
                     if message.content.split()[0] == '!reset':
                         if len(message.content.split()) >= 2:
                             target = message.content.split()[1]
-                            users = list(map(str, self.user_quotas.keys()))
-                            real_target = self.user_quotas.keys()[users.index(target)]
-                            if real_target in self.user_quotas:
-                                logging.info('Resetting quota for ' + target)
-                                self.user_quotas[real_target].reset_quota()
+                            real_target = None
+                            for user in self.user_quotas.keys():
+                                if user.name == target:
+                                    logging.info('Resetting quota for ' + target)
+                                    self.user_quotas[user].reset_quota()
                             await message.channel.send('Les quotas de ' + target + ' ont été réinitialisés, deboulonnay now')
                         else:
                             await message.channel.send('T\'as pas oublié quelqu\'un toi ?')
