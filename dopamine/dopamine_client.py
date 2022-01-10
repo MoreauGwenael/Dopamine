@@ -30,7 +30,7 @@ class DopamineClient(discord.Client):
     async def on_message(self, message):
         try:
             # Exit if bot is calling himself
-            if message.author == self.user or message.content[0] != '!':
+            if message.author == self.user:
                 return
 
             if message.content == '!commands':
@@ -46,7 +46,7 @@ class DopamineClient(discord.Client):
                     for command in self.available_commands_basic:
                         commands_message += f'\t{command}\n'
                     commands_message += 'Allez, suces-toi.'
-                    await message.channel.send(commands_message)
+                await message.channel.send(commands_message)
 
             if message.author not in self.user_quotas:
                 self.user_quotas[message.author] = Quota(message.author)
