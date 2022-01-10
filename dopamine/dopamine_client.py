@@ -61,10 +61,10 @@ class DopamineClient(discord.Client):
                     if message.content.split()[0] == '!reset':
                         if len(message.content.split()) >= 2:
                             target = message.content.split()[1]
-                            if target in self.user_quotas:
+                            users = list(map(str, self.user_quotas.keys()))
+                            real_target = self.user_quotas.keys()[users.index(target)]
+                            if real_target in self.user_quotas:
                                 logging.info('Resetting quota for ' + target)
-                                users = list(map(str, self.user_quotas.keys()))
-                                real_target = self.user_quotas.keys()[users.index(target)]
                                 self.user_quotas[real_target].reset_quota()
                             await message.channel.send('Les quotas de ' + target + ' ont été réinitialisés, deboulonnay now')
                         else:
