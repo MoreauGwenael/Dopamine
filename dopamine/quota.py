@@ -11,22 +11,27 @@ class Quota:
         self.muted = False
         self.refresh_quota()
 
+    # Timer régulier d'ajout de crédit
     def refresh_quota(self):
-        logging.info(f'[Quota] Refreshing quota for {self.discord_user}')
+        # Rajoute un crédit si manquant & non-muté
         if self.quota_remaining < self.start_quota and not self.muted:
+            logging.info(f'[Quota] Refreshing quota for {self.discord_user}')
             self.quota_remaining += 1
 
-        # Add one credit every 1800s == 30min
+        # Relance un nouveau timer pour s'autoappeler après 1800s (30m)
         threading.Timer(int(os.getenv('REFRESH_QUOTA_TIMER', 1800)), self.refresh_quota).start()
 
+    # Vérifie si crédit disponible, et le consume
     def use_quota(self):
+        # Si crédit disponible, en enlève 1 et renvoie True
         if self.quota_remaining > 0:
             self.quota_remaining = self.quota_remaining - 1
             logging.info(f'[Quota] {self.quota_remaining} quota(s) remaining for {self.discord_user}!')
             return True
+        # Sinon, renvoie False
         else:
-            # No quota ...
             return False
 
+    # Réinitialise les crédits de l'utilisateur, utilisé par !reset par un admin
     def reset_quota(self):
         self.quota_remaining = self.start_quota
