@@ -11,7 +11,7 @@ class DopamineClient(discord.Client):
     def __init__(self):
         logging.info('Init discord client')
         self.discord_helper = DiscordHelper()
-        self.available_commands_basic = ['!dopamine', '!pinned']
+        self.available_commands_basic = ['!dopamine', '!pinned', '!connard']
         self.available_commands_admin = ['!reset', '!tg', '!debaillonnay', '!maintenance', '!op', '!deop']
         self.admins = ['Shloumpf', 'mesh33']
         self.muted = []
@@ -50,13 +50,13 @@ class DopamineClient(discord.Client):
                         commands_message += f'\t{command}\n'
                     for command in self.available_commands_admin:
                         commands_message += f'\t{command}\n'
-                    commands_message += 'Allez, suces-toi quand même'
+                    commands_message += 'Allez, suce-toi quand même'
                 # Affiche les commandes normales
                 else:
                     commands_message = 'Enculé de Luigi, les commandes à ta disposition sont les suivantes :\n'
                     for command in self.available_commands_basic:
                         commands_message += f'\t{command}\n'
-                    commands_message += 'Allez, suces-toi.'
+                    commands_message += 'Allez, suce-toi.'
                 await message.channel.send(commands_message)
 
             # Si la commande lancée est une commande admin
@@ -150,6 +150,12 @@ class DopamineClient(discord.Client):
                             channels = message.guild.text_channels
                             await self.discord_helper.update_pinned_messages(channels)
                             await message.channel.send(self.discord_helper.get_random_pinned_message())
+                        
+                        # Connard -> Enculé
+                        if message.content == '!connard':
+                            logging.info('Demande insulte')
+                            await message.channel.send('Enculé')
+
                     # Si l'utilisateur n'a plus de crédits
                     else:
                         await message.channel.send('T\'as plus aucun crédit enculé. T\'aurais pas abusé de la dopamine un peu ? Va falloir attendre, enculé de Luigi.')
