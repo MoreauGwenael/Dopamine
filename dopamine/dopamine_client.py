@@ -6,22 +6,28 @@ import discord
 from dopamine.discord_helper import DiscordHelper
 from dopamine.quota import Quota
 
+from tictactoe.board import Board
+from tictactoe.minimax import Minimax
+
 
 class DopamineClient(discord.Client):
     def __init__(self):
         logging.info('Init discord client')
         self.discord_helper = DiscordHelper()
-        self.available_commands_basic = ['!dopamine', '!pinned', '!connard']
+        self.available_commands_basic = ['!dopamine', '!pinned', '!connard', '!tttcommands']
         self.available_commands_admin = ['!reset', '!tg', '!debaillonnay', '!maintenance', '!op', '!deop']
-        self.admins = ['Shloumpf', 'mesh33']
+        self.available_commands_tictactoe = ['!tttshow', '!tttstart', '!tttplay']
+        self.admins = ['Shloumpf']
         self.muted = []
         self.mean = [
             'Culé de villageois, tu te crois tout permis ?',
             'Commence par la fermer toi, \'spèce de gueux',
             'C\'est non',
-            'Tu te prends pour qui ? Retourne dans la plèbe',
+            'Tu te prends pour qui ? Retourne avec la plèbe d\'où tu viens',
         ]
         self.user_quotas = {}
+        self.games = {}
+        self.ia = Minimax()
         super().__init__()
 
     async def on_ready(self):
@@ -57,6 +63,13 @@ class DopamineClient(discord.Client):
                     for command in self.available_commands_basic:
                         commands_message += f'\t{command}\n'
                     commands_message += 'Allez, suce-toi.'
+                await message.channel.send(commands_message)
+
+            # Commande d'affichage des commandes du TicTacToe
+            if message.content == '!tttcommands':
+                commands_message = 'Commandes de jeu :\n\ttttshow -> affiche ta grille\n\ttttstart -> ' \
+                                   'lance une nouvelle partie\n\ttttplay #' \
+                                   ' -> joue le coup à la case fournie\n\n**Je paye un maxitacos à celui qui win**'
                 await message.channel.send(commands_message)
 
             # Si la commande lancée est une commande admin
@@ -134,6 +147,7 @@ class DopamineClient(discord.Client):
 
             # Si l'utilisateur n'est pas baillonné
             elif message.author.name not in self.muted:
+                # Commandes générales
                 if message.content in self.available_commands_basic:
                     if self.user_quotas[message.author].use_quota():
                         # Envoie une vidéo aléatoire + suppression dans la liste
@@ -158,7 +172,64 @@ class DopamineClient(discord.Client):
 
                     # Si l'utilisateur n'a plus de crédits
                     else:
-                        await message.channel.send('T\'as plus aucun crédit enculé. T\'aurais pas abusé de la dopamine un peu ? Va falloir attendre, enculé de Luigi.')
+                        await message.channel.send('T\'as plus aucun crédit enculé. T\'aurais pas abusé de la dopamine '
+                                                   'un peu ? Va falloir attendre, enculé de Luigi.')
+
+                # Commandes du TicTacToe
+                if message.content.split()[0] in self.available_commands_tictactoe:
+                    # Affiche la grille de l'utilisateur
+                    if message.content == '!tttshow':
+                        logging.info('Affichage de la grille de ' + message.author.name)
+                        if message.author.name in self.games.keys():
+                            await message.channel.send(str(self.games[message.author.name]))
+                        else:
+                            await message.channel.send('Aucune partie en cours, démarre une partie avec la commande '
+                                                       '!tttstart')
+
+                    # Démarre une nouvelle partie
+                    if message.content == '!tttstart':
+                        logging.info('Démarrage d\'une partie pour ' + message.author.name)
+                        self.games[message.author.name] = Board()
+                        await message.channel.send(self.games[message.author.name].__str__())
+
+                    # Joue un coup
+                    if message.content.split()[0] == '!tttplay':
+                        if message.author.name not in self.games.keys():
+                            await message.channel.send('Aucune partie en cours, démarre une partie avec la commande '
+                                                       '!tttstart')
+                        else:
+                            if len(message.content.split()) > 1:
+                                if message.content.split()[1].is_integer():
+                                    move = int(message.content.split()[1])
+                                    if move not in self.games[message.author.name].available_moves:
+                                        if 1 <= move <= 9:
+                                            await message.channel.send('Tu sais pas lire wesh, la case est déjà prise')
+                                        else:
+                                            await message.channel.send('Si tu sais pas tirer dans la grille, lève au moins le viseur')
+                                    else:
+                                        x, y = 2 - ((move - 1) // 3), (move - 1) % 3
+                                        self.games[message.author.name].insert(x, y, 'X')
+                                        self.games[message.author.name].available_moves.remove(move)
+                                        if not (self.games[message.author.name].won()[0] or self.games[message.author.name].is_full()):
+                                            _, ia_move = self.ia.max(self.games[message.author.name], 9)
+                                            x, y = ia_move
+                                            self.games[message.author.name].insert(x, y, 'O')
+                                            self.games[message.author.name].available_moves.remove((2 - x) * 3 + y + 1)
+                                            await message.channel.send(self.games[message.author.name].__str__())
+                                        if self.games[message.author.name].won()[0]:
+                                            if self.games[message.author.name].won()[1] == 'X':
+                                                print('Wallah t\'as gagné un maxitacos, faudra que je corrige mon code parce que t\'es pas censé y arriver')
+                                            else:
+                                                print('T\'es claqué au sol mec')
+                                            self.games.pop(message.author.name)
+                                        elif self.games[message.author.name].is_full():
+                                            print('I play zi draw')
+                                            self.games.pop(message.author.name)
+                                else:
+                                    await message.channel.send('https://dessinemoiunehistoire.net/ecriture-chiffres-maternelle/')
+                            else:
+                                await message.channel.send('T\'as oublié la moitié du message au spawn')
+
             # Si l'utilisateur est baillonné
             else:
                 await message.channel.send('Les noobs ont pas le droit de parler')

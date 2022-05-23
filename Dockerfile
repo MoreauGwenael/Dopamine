@@ -1,4 +1,4 @@
-FROM python:3.7-alpine AS base_alpine
+FROM python:3.10-alpine AS base_alpine
 
 RUN apk add --update alpine-sdk
 COPY requirements.txt .
