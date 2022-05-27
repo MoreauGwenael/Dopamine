@@ -69,7 +69,7 @@ class DopamineClient(discord.Client):
             if message.content == '!tttcommands':
                 commands_message = 'Commandes de jeu :\n\ttttshow -> affiche ta grille\n\ttttstart -> ' \
                                    'lance une nouvelle partie\n\ttttplay #' \
-                                   ' -> joue le coup à la case fournie\n\n**Je paye un maxitacos à celui qui win**'
+                                   ' -> joue le coup à la case donnée'
                 await message.channel.send(commands_message)
 
             # Si la commande lancée est une commande admin
@@ -210,6 +210,8 @@ class DopamineClient(discord.Client):
                                         x, y = 2 - ((move - 1) // 3), (move - 1) % 3
                                         self.games[message.author.name].insert(x, y, 'X')
                                         self.games[message.author.name].available_moves.remove(move)
+                                        logging.info(self.games[message.author.name].won()[0])
+                                        logging.info(self.games[message.author.name].is_full())
                                         if not (self.games[message.author.name].won()[0] or self.games[message.author.name].is_full()):
                                             _, ia_move = self.ia.max(self.games[message.author.name], 9)
                                             x, y = ia_move
@@ -218,12 +220,14 @@ class DopamineClient(discord.Client):
                                             await message.channel.send(self.games[message.author.name].__str__())
                                         if self.games[message.author.name].won()[0]:
                                             if self.games[message.author.name].won()[1] == 'X':
-                                                print('Wallah t\'as gagné un maxitacos, faudra que je corrige mon code parce que t\'es pas censé y arriver')
+                                                await message.channel.send(self.games[message.author.name].__str__())
+                                                await message.channel.send('Wallah t\'as gagné, faudra que je corrige mon code parce que t\'es pas censé y arriver')
                                             else:
-                                                print('T\'es claqué au sol mec')
+                                                await message.channel.send('T\'es claqué au sol')
                                             self.games.pop(message.author.name)
                                         elif self.games[message.author.name].is_full():
-                                            print('I play zi draw')
+                                            await message.channel.send(self.games[message.author.name].__str__())
+                                            await message.channel.send('I play zi draw')
                                             self.games.pop(message.author.name)
                                 else:
                                     await message.channel.send('https://dessinemoiunehistoire.net/ecriture-chiffres-maternelle/')
@@ -236,3 +240,4 @@ class DopamineClient(discord.Client):
         # Si j'ai mal codé <3
         except Exception as e:
             raise e
+

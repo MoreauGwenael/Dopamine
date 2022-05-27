@@ -11,8 +11,6 @@ class Board:
         self.available_moves = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     def __str__(self):
-        # Return de debugage
-        # return '\n'.join(' '.join(row) for row in self.grid)
         answer = ''
         for row_nb in range(3):
             row = self.grid[row_nb]
@@ -45,7 +43,7 @@ class Board:
         self.grid[row][col] = '.'
 
     def is_full(self):
-        return '.' not in self.__str__()
+        return '.' not in '\n'.join(' '.join(row) for row in self.grid)
 
     def is_filled(self, row, col):
         return self.grid[row][col] != '.'
@@ -70,3 +68,4 @@ class Board:
             if ''.join(self.grid[rc][rc] for rc in range(3)).count(symbol) == 3: return True, symbol
             if ''.join(self.grid[rc][2-rc] for rc in range(3)).count(symbol) == 3: return True, symbol
         return False, ''
+
