@@ -190,6 +190,8 @@ class DopamineClient(discord.Client):
                     if message.content == '!tttstart':
                         logging.info('Démarrage d\'une partie pour ' + message.author.name)
                         self.games[message.author.name] = Board()
+                        if randint(0, 1) == 1:
+                            self.games[message.author.name].insert(0, 0, 'O')
                         await message.channel.send(self.games[message.author.name].__str__())
 
                     # Joue un coup
