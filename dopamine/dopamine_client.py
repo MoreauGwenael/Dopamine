@@ -6,8 +6,8 @@ import discord
 from dopamine.discord_helper import DiscordHelper
 from dopamine.quota import Quota
 
-from tictactoe.board import Board
-from tictactoe.minimax import Minimax
+from .tictactoe.board import Board
+from .tictactoe.minimax import Minimax
 
 
 class DopamineClient(discord.Client):
@@ -199,7 +199,7 @@ class DopamineClient(discord.Client):
                                                        '!tttstart')
                         else:
                             if len(message.content.split()) > 1:
-                                if message.content.split()[1].is_integer():
+                                if message.content.split()[1].isdigit():
                                     move = int(message.content.split()[1])
                                     if move not in self.games[message.author.name].available_moves:
                                         if 1 <= move <= 9:
