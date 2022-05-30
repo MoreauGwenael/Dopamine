@@ -16,7 +16,7 @@ class DopamineClient(discord.Client):
         self.discord_helper = DiscordHelper()
         self.available_commands_basic = ['!dopamine', '!pinned', '!connard', '!tttcommands']
         self.available_commands_admin = ['!reset', '!tg', '!debaillonnay', '!maintenance', '!op', '!deop']
-        self.available_commands_tictactoe = ['!tttshow', '!tttstart', '!tttplay']
+        self.available_commands_tictactoe = ['!tttshow', '!tttstart', '!tttplay', '!tttduel']
         self.admins = ['Shloumpf']
         self.muted = []
         self.mean = [
@@ -69,7 +69,7 @@ class DopamineClient(discord.Client):
             if message.content == '!tttcommands':
                 commands_message = 'Commandes de jeu :\n\ttttshow -> affiche ta grille\n\ttttstart -> ' \
                                    'lance une nouvelle partie\n\ttttplay #' \
-                                   ' -> joue le coup à la case donnée'
+                                   ' -> joue le coup à la case donnée\n\ttttduel # -> lance un duel contre un joueur'
                 await message.channel.send(commands_message)
 
             # Si la commande lancée est une commande admin
@@ -92,10 +92,12 @@ class DopamineClient(discord.Client):
                                     logging.info('Resetting quota for ' + target)
                                     found = True
                                     self.user_quotas[user].reset_quota()
-                                    await message.channel.send('Les quotas de ' + target + ' ont été réinitialisés, deboulonnay now')
+                                    await message.channel.send(
+                                        'Les quotas de ' + target + ' ont été réinitialisés, deboulonnay now')
                             # Si non-trouvé
                             if not found:
-                                await message.channel.send('Utilisateur ' + target + ' non trouvé, faudrait apprendre à écrire')
+                                await message.channel.send(
+                                    'Utilisateur ' + target + ' non trouvé, faudrait apprendre à écrire')
                         else:
                             await message.channel.send('T\'as pas oublié quelqu\'un toi ?')
                     
@@ -108,7 +110,8 @@ class DopamineClient(discord.Client):
                                 self.muted.append(target)
                             await message.channel.send('TG ' + target)
                         else:
-                            await message.channel.send('Avant de vouloir faire taire quelqu\'un, commence par écrire correctement')
+                            await message.channel.send(
+                                'Avant de vouloir faire taire quelqu\'un, commence par écrire correctement')
 
                     # Débaillonne un utilisateur des commandes non-admin
                     if message.content.split()[0] == '!debaillonnay':
@@ -186,13 +189,37 @@ class DopamineClient(discord.Client):
                             await message.channel.send('Aucune partie en cours, démarre une partie avec la commande '
                                                        '!tttstart')
 
-                    # Démarre une nouvelle partie
+                    # Démarre une nouvelle partie contre l'IA
                     if message.content == '!tttstart':
                         logging.info('Démarrage d\'une partie pour ' + message.author.name)
-                        self.games[message.author.name] = Board()
+                        if message.author.name in self.games.keys():
+                            if not self.games[message.author.name].is_versus_ia():
+                                if self.games[message.author.name].player1 == message.author.name:
+                                    self.games.pop(self.games[message.author.name].player2)
+                                else:
+                                    self.games.pop(self.games[message.author.name].player1)
+                        self.games[message.author.name] = Board(player1=message.author.name)
                         if randint(0, 1) == 1:
                             self.games[message.author.name].insert(0, 0, 'O')
                         await message.channel.send(self.games[message.author.name].__str__())
+
+                    # Démarre une nouvelle partie contre un joueur
+                    if message.content.split()[0] == '!tttduel':
+                        logging.info('Démarrage d\'une partie entre ' + message.author.name + ' et ' +
+                                     message.content.split()[1])
+                        if len(message.content.split()) > 1:
+                            if message.author.name in self.games.keys():
+                                if not self.games[message.author.name].is_versus_ia():
+                                    if self.games[message.author.name].player1 == message.author.name:
+                                        self.games.pop(self.games[message.author.name].player2)
+                                    else:
+                                        self.games.pop(self.games[message.author.name].player1)
+                            self.games[message.author.name] = Board(player1=message.author.name,
+                                                                    player2=message.content.split()[1])
+                            self.games[message.content.split()[1]] = self.games[message.author.name]
+                            await message.channel.send(self.games[message.author.name].__str__())
+                        else:
+                            await message.chennel.send('Tu veux jouer contre toi-même ?')
 
                     # Joue un coup
                     if message.content.split()[0] == '!tttplay':
@@ -200,43 +227,83 @@ class DopamineClient(discord.Client):
                             await message.channel.send('Aucune partie en cours, démarre une partie avec la commande '
                                                        '!tttstart')
                         else:
-                            if len(message.content.split()) > 1:
-                                if message.content.split()[1].isdigit():
-                                    move = int(message.content.split()[1])
-                                    if move not in self.games[message.author.name].available_moves:
-                                        if 1 <= move <= 9:
-                                            await message.channel.send('Tu sais pas lire wesh, la case est déjà prise')
-                                        else:
-                                            await message.channel.send('Si tu sais pas tirer dans la grille, lève au moins le viseur')
-                                    else:
-                                        show = True
-                                        x, y = 2 - ((move - 1) // 3), (move - 1) % 3
-                                        self.games[message.author.name].insert(x, y, 'X')
-                                        self.games[message.author.name].available_moves.remove(move)
-                                        logging.info(self.games[message.author.name].won()[0])
-                                        logging.info(self.games[message.author.name].is_full())
-                                        if not (self.games[message.author.name].won()[0] or self.games[message.author.name].is_full()):
-                                            show = False
-                                            _, ia_move = self.ia.max(self.games[message.author.name], 9)
-                                            x, y = ia_move
-                                            self.games[message.author.name].insert(x, y, 'O')
-                                            self.games[message.author.name].available_moves.remove((2 - x) * 3 + y + 1)
-                                            await message.channel.send(self.games[message.author.name].__str__())
-                                        if self.games[message.author.name].won()[0]:
-                                            if self.games[message.author.name].won()[1] == 'X':
-                                                await message.channel.send(self.games[message.author.name].__str__())
-                                                await message.channel.send('Wallah t\'as gagné, faudra que je corrige mon code parce que t\'es pas censé y arriver')
+                            if (self.games[message.author.name].player1 == message.author.name and not
+                                self.games[message.author.name].turn) or \
+                                (self.games[message.author.name].player2 == message.author.name and
+                                 self.games[message.author.name].turn):
+                                if len(message.content.split()) > 1:
+                                    if message.content.split()[1].isdigit():
+                                        move = int(message.content.split()[1])
+                                        if move not in self.games[message.author.name].available_moves:
+                                            if 1 <= move <= 9:
+                                                await message.channel.send(
+                                                    'Tu sais pas lire wesh, la case est déjà prise')
                                             else:
-                                                await message.channel.send('T\'es claqué au sol')
-                                            self.games.pop(message.author.name)
-                                        elif self.games[message.author.name].is_full():
-                                            if show: await message.channel.send(self.games[message.author.name].__str__())
-                                            await message.channel.send('I play zi draw')
-                                            self.games.pop(message.author.name)
+                                                await message.channel.send(
+                                                    'Si tu sais pas tirer dans la grille, lève au moins le viseur')
+                                        else:
+                                            show = True
+                                            x, y = 2 - ((move - 1) // 3), (move - 1) % 3
+                                            if self.games[message.author.name].player1 == message.author.name:
+                                                self.games[message.author.name].insert(x, y, 'X')
+                                            else:
+                                                self.games[message.author.name].insert(x, y, 'O')
+                                            self.games[message.author.name].change()
+                                            self.games[message.author.name].available_moves.remove(move)
+                                            if not self.games[message.author.name].is_versus_ia():
+                                                await message.channel.send(self.games[message.author.name].__str__())
+                                            if self.games[message.author.name].is_versus_ia() and not \
+                                                    (self.games[message.author.name].won()[0] or
+                                                     self.games[message.author.name].is_full()):
+                                                show = False
+                                                _, ia_move = self.ia.max(self.games[message.author.name], 9)
+                                                x, y = ia_move
+                                                self.games[message.author.name].insert(x, y, 'O')
+                                                self.games[message.author.name].change()
+                                                self.games[message.author.name].available_moves.remove(
+                                                    (2 - x) * 3 + y + 1)
+                                                await message.channel.send(self.games[message.author.name].__str__())
+                                            if self.games[message.author.name].won()[0]:
+                                                if self.games[message.author.name].won()[1] == 'X':
+                                                    await message.channel.send(
+                                                        self.games[message.author.name].__str__())
+                                                    if self.games[message.author.name].is_versus_ia():
+                                                        await message.channel.send('Wallah t\'as gagné, faudra que je '
+                                                                                   'corrige mon code parce que t\'es '
+                                                                                   'pas censé y arriver')
+                                                    else:
+                                                        await message.channel.send(
+                                                            'GG ' + self.games[message.author.name].player1)
+                                                else:
+                                                    if self.games[message.author.name].is_versus_ia():
+                                                        await message.channel.send('T\'es claqué au sol')
+                                                    else:
+                                                        await message.channel.send(
+                                                            self.games[message.author.name].__str__())
+                                                        await message.channel.send(
+                                                            'GG ' + self.games[message.author.name].player2)
+                                                if self.games[message.author.name].player1 == message.author.name:
+                                                    self.games.pop(self.games[message.author.name].player2)
+                                                else:
+                                                    self.games.pop(self.games[message.author.name].player1)
+                                                self.games.pop(message.author.name)
+                                            elif self.games[message.author.name].is_full():
+                                                if show:
+                                                    await message.channel.send(
+                                                        self.games[message.author.name].__str__())
+                                                await message.channel.send('I play zi draw')
+                                                if self.games[message.author.name].player1 == message.author.name:
+                                                    self.games.pop(self.games[message.author.name].player2)
+                                                else:
+                                                    self.games.pop(self.games[message.author.name].player1)
+                                                self.games.pop(message.author.name)
+                                    else:
+                                        await message.channel.send(
+                                            'https://dessinemoiunehistoire.net/ecriture-chiffres-maternelle/')
                                 else:
-                                    await message.channel.send('https://dessinemoiunehistoire.net/ecriture-chiffres-maternelle/')
+                                    await message.channel.send('T\'as oublié la moitié du message au spawn')
                             else:
-                                await message.channel.send('T\'as oublié la moitié du message au spawn')
+                                await message.channel.send('C\'est pas ton tour !')
 
             # Si l'utilisateur est baillonné
             else:
@@ -244,4 +311,3 @@ class DopamineClient(discord.Client):
         # Si j'ai mal codé <3
         except Exception as e:
             raise e
-
