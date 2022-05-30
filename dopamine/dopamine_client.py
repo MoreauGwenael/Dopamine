@@ -14,7 +14,8 @@ class DopamineClient(discord.Client):
     def __init__(self):
         logging.info('Init discord client')
         self.discord_helper = DiscordHelper()
-        self.available_commands_basic = ['!dopamine', '!pinned', '!connard', '!tttcommands']
+        self.available_commands_basic = ['!dopamine', '!pinned']
+        self.available_commands_others = ['!connard', '!depression', '!tttcommands']
         self.available_commands_admin = ['!reset', '!tg', '!debaillonnay', '!maintenance', '!op', '!deop']
         self.available_commands_tictactoe = ['!tttshow', '!tttstart', '!tttplay', '!tttduel']
         self.admins = ['Shloumpf']
@@ -54,6 +55,8 @@ class DopamineClient(discord.Client):
                     commands_message = 'Bien sûr maître, les commandes sont ci-dessous, disposez-en à votre guise :\n'
                     for command in self.available_commands_basic:
                         commands_message += f'\t{command}\n'
+                    for command in self.available_commands_others:
+                        commands_message += f'\t{command}\n'
                     for command in self.available_commands_admin:
                         commands_message += f'\t{command}\n'
                     commands_message += 'Allez, suce-toi quand même'
@@ -61,6 +64,8 @@ class DopamineClient(discord.Client):
                 else:
                     commands_message = 'Enculé de Luigi, les commandes à ta disposition sont les suivantes :\n'
                     for command in self.available_commands_basic:
+                        commands_message += f'\t{command}\n'
+                    for command in self.available_commands_others:
                         commands_message += f'\t{command}\n'
                     commands_message += 'Allez, suce-toi.'
                 await message.channel.send(commands_message)
@@ -151,7 +156,27 @@ class DopamineClient(discord.Client):
             # Si l'utilisateur n'est pas baillonné
             elif message.author.name not in self.muted:
                 # Commandes générales
-                if message.content in self.available_commands_basic:
+                if message.content in self.available_commands_others:
+                    # Connard -> Enculé
+                    if message.content == '!connard':
+                        logging.info('Demande insulte')
+                        await message.channel.send('Enculé')
+
+                    # Cure de dopamine en cas de depression
+                    if message.content == '!depression':
+                        if self.user_quotas[message.author].get_quota():
+                            await message.channel.send('T\'as encore des crédits, commence par te curer le nez au de '
+                                                       'curer ta dépression')
+                        else:
+                            logging.info(f'Une depression est en cours pour {message.author.name}, lancement de la '
+                                         f'piqûre')
+                            if self.user_quotas[message.author].use_quota_depression():
+                                # Refresh le compteur
+                                self.user_quotas[message.author].reset_quota()
+                                await message.channel.send('Courage mon ami, voici 3 nouveaux quotas pour profiter de '
+                                                           'la vie, prochaine piqûre dans 2 semaines !')
+
+                elif message.content in self.available_commands_basic:
                     if self.user_quotas[message.author].use_quota():
                         # Envoie une vidéo aléatoire + suppression dans la liste
                         if message.content == '!dopamine':
@@ -167,11 +192,6 @@ class DopamineClient(discord.Client):
                             channels = message.guild.text_channels
                             await self.discord_helper.update_pinned_messages(channels)
                             await message.channel.send(self.discord_helper.get_random_pinned_message())
-                        
-                        # Connard -> Enculé
-                        if message.content == '!connard':
-                            logging.info('Demande insulte')
-                            await message.channel.send('Enculé')
 
                     # Si l'utilisateur n'a plus de crédits
                     else:
