@@ -250,6 +250,8 @@ class DopamineClient(discord.Client):
                                                 self.games[message.author.name].insert(x, y, 'O')
                                             self.games[message.author.name].change()
                                             self.games[message.author.name].available_moves.remove(move)
+                                            if not self.games[message.author.name].is_versus_ia():
+                                                await message.channel.send(self.games[message.author.name].__str__())
                                             if self.games[message.author.name].is_versus_ia() and not \
                                                     (self.games[message.author.name].won()[0] or
                                                      self.games[message.author.name].is_full()):
