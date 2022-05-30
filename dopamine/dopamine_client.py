@@ -55,6 +55,8 @@ class DopamineClient(discord.Client):
                     commands_message = 'Bien sûr maître, les commandes sont ci-dessous, disposez-en à votre guise :\n'
                     for command in self.available_commands_basic:
                         commands_message += f'\t{command}\n'
+                    for command in self.available_commands_others:
+                        commands_message += f'\t{command}\n'
                     for command in self.available_commands_admin:
                         commands_message += f'\t{command}\n'
                     commands_message += 'Allez, suce-toi quand même'
