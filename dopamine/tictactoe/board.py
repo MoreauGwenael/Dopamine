@@ -1,14 +1,20 @@
 class Board:
     grid = []
     available_moves = []
+    player1 = ''
+    player2 = ''
+    turn = False
 
-    def __init__(self):
+    def __init__(self, player1, player2='IA'):
         self.grid = [
             ['.', '.', '.'],
             ['.', '.', '.'],
             ['.', '.', '.']
         ]
         self.available_moves = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        self.player1 = player1
+        self.player2 = player2
+        self.turn = False
 
     def __str__(self):
         answer = ''
@@ -34,7 +40,6 @@ class Board:
                 if col_nb != 2: answer += ' | '
                 elif row_nb != 2: answer += '\n'
         return answer
-
 
     def insert(self, row, col, char):
         self.grid[row][col] = char
@@ -69,3 +74,8 @@ class Board:
             if ''.join(self.grid[rc][2-rc] for rc in range(3)).count(symbol) == 3: return True, symbol
         return False, ''
 
+    def is_versus_ia(self):
+        return self.player2 == 'IA'
+
+    def change(self):
+        self.turn = not self.turn
