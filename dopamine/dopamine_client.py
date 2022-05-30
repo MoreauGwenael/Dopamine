@@ -190,6 +190,8 @@ class DopamineClient(discord.Client):
                     if message.content == '!tttstart':
                         logging.info('Démarrage d\'une partie pour ' + message.author.name)
                         self.games[message.author.name] = Board()
+                        if randint(0, 1) == 1:
+                            self.games[message.author.name].insert(0, 0, 'O')
                         await message.channel.send(self.games[message.author.name].__str__())
 
                     # Joue un coup
@@ -207,12 +209,14 @@ class DopamineClient(discord.Client):
                                         else:
                                             await message.channel.send('Si tu sais pas tirer dans la grille, lève au moins le viseur')
                                     else:
+                                        show = True
                                         x, y = 2 - ((move - 1) // 3), (move - 1) % 3
                                         self.games[message.author.name].insert(x, y, 'X')
                                         self.games[message.author.name].available_moves.remove(move)
                                         logging.info(self.games[message.author.name].won()[0])
                                         logging.info(self.games[message.author.name].is_full())
                                         if not (self.games[message.author.name].won()[0] or self.games[message.author.name].is_full()):
+                                            show = False
                                             _, ia_move = self.ia.max(self.games[message.author.name], 9)
                                             x, y = ia_move
                                             self.games[message.author.name].insert(x, y, 'O')
@@ -226,7 +230,7 @@ class DopamineClient(discord.Client):
                                                 await message.channel.send('T\'es claqué au sol')
                                             self.games.pop(message.author.name)
                                         elif self.games[message.author.name].is_full():
-                                            await message.channel.send(self.games[message.author.name].__str__())
+                                            if show: await message.channel.send(self.games[message.author.name].__str__())
                                             await message.channel.send('I play zi draw')
                                             self.games.pop(message.author.name)
                                 else:
