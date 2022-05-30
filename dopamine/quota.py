@@ -54,3 +54,7 @@ class Quota:
     # Réinitialise les crédits de l'utilisateur, utilisé par !reset par un admin
     def reset_quota(self):
         self.quota_remaining = self.start_quota
+
+    # Retourne le nombre de quota restants
+    def get_quota(self):
+        return self.quota_remaining

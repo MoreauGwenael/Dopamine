@@ -162,10 +162,17 @@ class DopamineClient(discord.Client):
 
                     # Cure de dopamine en cas de depression
                     if message.content == '!depression':
-                        logging.info(f'Une depression est en cours pour {message.author.name}, lancement de la piqûre')
-                        if self.user_quotas[message.author].use_quota_depression():
-                            # Refresh le compteur
-                            self.user_quotas[message.author].reset_quota()
+                        if self.user_quotas[message.author].get_quota():
+                            await message.channel.send('T\'as encore des crédits, commence par te curer le nez au de '
+                                                       'curer ta dépression')
+                        else:
+                            logging.info(f'Une depression est en cours pour {message.author.name}, lancement de la '
+                                         f'piqûre')
+                            if self.user_quotas[message.author].use_quota_depression():
+                                # Refresh le compteur
+                                self.user_quotas[message.author].reset_quota()
+                                await message.channel.send('Courage mon ami, voici 3 nouveaux quotas pour profiter de '
+                                                           'la vie, prochaine piqûre dans 2 semaines !')
 
                 elif message.content in self.available_commands_basic:
                     if self.user_quotas[message.author].use_quota():
