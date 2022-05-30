@@ -16,7 +16,7 @@ class DopamineClient(discord.Client):
         self.discord_helper = DiscordHelper()
         self.available_commands_basic = ['!dopamine', '!pinned', '!connard', '!tttcommands']
         self.available_commands_admin = ['!reset', '!tg', '!debaillonnay', '!maintenance', '!op', '!deop']
-        self.available_commands_tictactoe = ['!tttshow', '!tttstart', '!tttplay', 'tttduel']
+        self.available_commands_tictactoe = ['!tttshow', '!tttstart', '!tttplay', '!tttduel']
         self.admins = ['Shloumpf']
         self.muted = []
         self.mean = [
