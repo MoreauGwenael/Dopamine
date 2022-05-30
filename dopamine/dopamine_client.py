@@ -225,7 +225,7 @@ class DopamineClient(discord.Client):
 
                     # Démarre une nouvelle partie contre un joueur
                     if message.content.split()[0] == '!tttduel':
-                        logging.info('Démarrage d\'une partie entre ' + message.aufthor.name + ' et ' +
+                        logging.info('Démarrage d\'une partie entre ' + message.author.name + ' et ' +
                                      message.content.split()[1])
                         if len(message.content.split()) > 1:
                             if message.author.name in self.games.keys():
