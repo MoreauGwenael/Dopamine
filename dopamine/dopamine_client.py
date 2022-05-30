@@ -285,9 +285,9 @@ class DopamineClient(discord.Client):
                                                 await message.channel.send(self.games[message.author.name].__str__())
                                             if self.games[message.author.name].won()[0]:
                                                 if self.games[message.author.name].won()[1] == 'X':
-                                                    await message.channel.send(
-                                                        self.games[message.author.name].__str__())
                                                     if self.games[message.author.name].is_versus_ia():
+                                                        await message.channel.send(
+                                                            self.games[message.author.name].__str__())
                                                         await message.channel.send('Wallah t\'as gagné, faudra que je '
                                                                                    'corrige mon code parce que t\'es '
                                                                                    'pas censé y arriver')
@@ -299,8 +299,6 @@ class DopamineClient(discord.Client):
                                                         await message.channel.send('T\'es claqué au sol')
                                                     else:
                                                         await message.channel.send(
-                                                            self.games[message.author.name].__str__())
-                                                        await message.channel.send(
                                                             'GG ' + self.games[message.author.name].player2)
                                                 if self.games[message.author.name].player1 == message.author.name:
                                                     self.games.pop(self.games[message.author.name].player2)
@@ -308,7 +306,7 @@ class DopamineClient(discord.Client):
                                                     self.games.pop(self.games[message.author.name].player1)
                                                 self.games.pop(message.author.name)
                                             elif self.games[message.author.name].is_full():
-                                                if show:
+                                                if show and self.games[message.author.name].is_versus_ia():
                                                     await message.channel.send(
                                                         self.games[message.author.name].__str__())
                                                 await message.channel.send('I play zi draw')
