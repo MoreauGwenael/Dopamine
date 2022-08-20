@@ -8,6 +8,7 @@ from urllib import request
 
 class DiscordHelper:
     def __init__(self):
+        self.last_pinned_message_index = 0
         self.youtube_token = os.getenv('YOUTUBE_TOKEN')
         self.playlists_id = eval(os.getenv('PLAYLIST_ID'))
         self.video_ids = None
@@ -19,7 +20,12 @@ class DiscordHelper:
 
     # Renvoie un message épinglé aléatoire
     def get_random_pinned_message(self):
-        return self.pinned_messages[randint(0, len(self.pinned_messages) - 1)]
+        pinned_message_index = randint(0, len(self.pinned_messages) - 1)
+        while pinned_message_index-2 <= self.last_pinned_message_index <= pinned_message_index+2:
+            pinned_message_index = randint(0, len(self.pinned_messages) - 1)
+        
+        self.last_pinned_message_index = pinned_message_index
+        return self.pinned_messages[pinned_message_index]
 
     # Met à jour la liste des messages épinglés
     async def update_pinned_messages(self, channels):
