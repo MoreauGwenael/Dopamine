@@ -29,7 +29,7 @@ class DopamineClient(discord.Client):
         self.user_quotas = {}
         self.games = {}
         self.ia = Minimax()
-        super().__init__(intents=discord.Intents.default())
+        super().__init__(intents=discord.Intents.all())
 
     async def on_ready(self):
         logging.info(f'Logged in as {self.user.name} : {self.user.id}')
