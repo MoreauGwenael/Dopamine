@@ -20,9 +20,9 @@ class DiscordHelper:
 
     # Renvoie un message épinglé aléatoire
     def get_random_pinned_message(self):
-        pinned_message_index = randint(0, len(self.pinned_messages) - 1)
+        pinned_message_index = randint(0, 959233) % (len(self.pinned_messages) - 1)
         while pinned_message_index-2 <= self.last_pinned_message_index <= pinned_message_index+2:
-            pinned_message_index = randint(0, len(self.pinned_messages) - 1)
+            pinned_message_index = randint(0, 959233) % (len(self.pinned_messages) - 1)
         
         self.last_pinned_message_index = pinned_message_index
         return self.pinned_messages[pinned_message_index]
